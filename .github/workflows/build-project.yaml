@@ -34,7 +34,7 @@ jobs:
           cd ${{ github.workspace }}
           git clone https://github.com/dimtpap/obs-pipewire-audio-capture --recursive
           cd ${{ github.workspace }}/obs-pipewire-audio-capture
-          cmake -B build -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/out/plugins" -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          cmake -B build -DCMAKE_INSTALL_PREFIX="/usr" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX={"type":"STRING","value":"${{ github.workspace }}/out/plugins"}
           cmake --build build
           cmake --install build
           tree ${{ github.workspace }}/out
