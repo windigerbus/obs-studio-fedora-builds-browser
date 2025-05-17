@@ -1,4 +1,5 @@
 OBS Studio <https://obsproject.com>
+
 This fork is running GitHub Actions for building OBS Studio on Fedora with browser support.
 ===================================
 
