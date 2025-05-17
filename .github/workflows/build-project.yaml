@@ -1,4 +1,5 @@
 name: Build Project
+on: [push, commit]
 jobs:
   fedora-build:
     name: Fedora
