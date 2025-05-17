@@ -11,19 +11,12 @@ jobs:
       image: ghcr.io/gbraad-actions/fedora:stable
       options: --privileged
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      - uses: actions/cache/restore@v4
-        id: ccache-cache
-        with:
-          path: ${{ github.workspace }}/.ccache
-          key: ${{ runner.os }}-${{ matrix.os }}-ccache-x86_64-fedora
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.os }}-ccache-x86_64-
       - name: Download/Install Dependencies 📦
         run: |
+          rm -rf ${{ github.workspace }}
+          mkdir -p ${{ github.workspace }}
+          cd ${{ github.workspace }}/..
+          git clone --recursive https://github.com/Bummbumm6/obs-studio-fedora-builds-browser
           sudo dnf install -y dnf-plugins-core
           sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm -y
           sudo dnf update -y
