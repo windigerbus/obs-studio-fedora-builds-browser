@@ -27,7 +27,8 @@ jobs:
           rm o.tar.xz
           cd ${{ github.workspace }}
           git config --global --add safe.directory ${{ github.workspace }}
-          GHWORK=${{ github.workspace }} echo $GHWORK && cmake --preset fedora --fresh
+          export GHWORK=${{ github.workspace }}
+          echo $GHWORK
+          cmake --preset fedora --fresh
           cd build_fedora
-          cd ${{ github.workspace }}/obs-studio/build_fedora
           ninja
