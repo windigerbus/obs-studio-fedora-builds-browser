@@ -11,7 +11,7 @@ jobs:
       image: ghcr.io/gbraad-actions/fedora:stable
       options: --privileged
     steps:
-      - name: Download/Install Dependencies 📦
+      - name: :3
         run: |
           rm -rf ${{ github.workspace }}
           mkdir -p ${{ github.workspace }}
@@ -25,15 +25,9 @@ jobs:
           tar -xvf o.tar.xz
           mv cef_binary_6533_linux_x86_64 ${{ github.workspace }}/obs-browser
           rm o.tar.xz
-
-      - name: Configure 🔧
-        run: |
           cd ${{ github.workspace }}
           git config --global --add safe.directory ${{ github.workspace }}
           GHWORK=${{ github.workspace }} cmake --preset fedora --fresh
           cd build_fedora
-
-      - name: Build 🔨
-        run: |
           cd ${{ github.workspace }}/obs-studio/build_fedora
           ninja
