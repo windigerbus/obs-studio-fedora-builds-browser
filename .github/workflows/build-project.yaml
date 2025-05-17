@@ -5,7 +5,7 @@ jobs:
     name: Fedora
     strategy:
       matrix:
-        os: [x64, ubuntu-latest]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     container:
       image: ghcr.io/gbraad-actions/fedora:stable
