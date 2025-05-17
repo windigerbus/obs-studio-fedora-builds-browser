@@ -39,5 +39,6 @@ jobs:
           mkdir -p ./linux-pipewire-audio/bin/64bit
           cp ./build/linux-pipewire-audio.so ./linux-pipewire-audio/bin/64bit/linux-pipewire-audio.so
           cp -r ./data/ ./linux-pipewire-audio/data/
+          mkdir -p ${{ github.workspace }}/out/plugins/linux-pipewire-audio
           mv ./linux-pipewire-audio ${{ github.workspace }}/out/plugins/linux-pipewire-audio
           tree ${{ github.workspace }}/out
