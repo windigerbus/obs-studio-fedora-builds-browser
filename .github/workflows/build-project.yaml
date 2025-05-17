@@ -24,14 +24,13 @@ jobs:
             ${{ runner.os }}-${{ matrix.os }}-ccache-x86_64-
       - name: Download/Install Dependencies 📦
         run: |
-          cd ${{ github.workspace }}
           sudo dnf install -y dnf-plugins-core
           sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm -y
           sudo dnf update -y
           sudo dnf install git ninja make curl alsa-lib-devel asio-devel cmake extra-cmake-modules ffmpeg-free-devel fontconfig-devel freetype-devel gcc gcc-c++ gcc-objc git glib2-devel jansson-devel json-devel libavcodec-free-devel libavdevice-free-devel librist-devel libcurl-devel libdatachannel-devel libdrm-devel libglvnd-devel libqrcodegencpp-devel libuuid-devel libva-devel libv4l-devel libvpl-devel libX11-devel libXcomposite-devel libXdamage libXinerama-devel libxkbcommon-devel luajit-devel make mbedtls-devel ninja nv-codec-headers pciutils-devel pipewire-devel pulseaudio-libs-devel python3-devel qt6-qtbase-devel qt6-qtbase-private-devel qt6-qtsvg-devel qt6-qtwayland-devel rnnoise-devel speexdsp-devel srt-devel swig systemd-devel uthash-devel vlc-devel wayland-devel websocketpp-devel x264-devel -y
           curl -sLo o.tar.xz https://cdn-fastly.obsproject.com/downloads/cef_binary_6533_linux_x86_64.tar.xz
           tar -xvf o.tar.xz
-          mv cef_binary_6533_linux_x86_64 obs-browser
+          mv cef_binary_6533_linux_x86_64 ${{ github.workspace }}/obs-browser
           rm o.tar.xz
 
       - name: Configure 🔧
