@@ -32,4 +32,5 @@ jobs:
           cmake --preset fedora --fresh
           cd build_fedora
           ninja
+          cd $GHWORK
           tree out
