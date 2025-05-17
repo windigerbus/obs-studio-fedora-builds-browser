@@ -31,7 +31,7 @@
         "ENABLE_WEBRTC": true,
 	      "ENABLE_BROWSER": true,
 	      "ENABLE_NVENC": true,
-	      "CEF_ROOT_DIR": {"type": "STRING", "value": "$penv{GHWORK}/obs-studio/obs-browser"},
+	      "CEF_ROOT_DIR": {"type": "STRING", "value": "$penv{GHWORK}/obs-browser"},
 	      "CMAKE_POSITION_INDEPENDENT_CODE": true
       }
     },
