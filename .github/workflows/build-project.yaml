@@ -23,20 +23,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.os }}-ccache-x86_64-
       - name: Download/Install Dependencies 📦
-        run: ""
-        run: "sudo dnf install -y dnf-plugins-core"
-        run: "sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm -y"
-        run: "sudo dnf update -y"
-        run: "sudo dnf install git ninja make curl alsa-lib-devel asio-devel cmake extra-cmake-modules ffmpeg-free-devel fontconfig-devel freetype-devel gcc gcc-c++ gcc-objc git glib2-devel jansson-devel json-devel libavcodec-free-devel libavdevice-free-devel librist-devel libcurl-devel libdatachannel-devel libdrm-devel libglvnd-devel libqrcodegencpp-devel libuuid-devel libva-devel libv4l-devel libvpl-devel libX11-devel libXcomposite-devel libXdamage libXinerama-devel libxkbcommon-devel luajit-devel make mbedtls-devel ninja nv-codec-headers pciutils-devel pipewire-devel pulseaudio-libs-devel python3-devel qt6-qtbase-devel qt6-qtbase-private-devel qt6-qtsvg-devel qt6-qtwayland-devel rnnoise-devel speexdsp-devel srt-devel swig systemd-devel uthash-devel vlc-devel wayland-devel websocketpp-devel x264-devel -y"
-        run: "curl -sLo o.tar.xz https://cdn-fastly.obsproject.com/downloads/cef_binary_6533_linux_x86_64.tar.xz"
-        run: "tar -xvf o.tar.xz"
-        run: "mv cef_binary_6533_linux_x86_64 obs-browser"
-        run: "rm o.tar.xz"
+        run: |
+          run: "cd $HOME"
+          run: "sudo dnf install -y dnf-plugins-core"
+          run: "sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm -y"
+          run: "sudo dnf update -y"
+          run: "sudo dnf install git ninja make curl alsa-lib-devel asio-devel cmake extra-cmake-modules ffmpeg-free-devel fontconfig-devel freetype-devel gcc gcc-c++ gcc-objc git glib2-devel jansson-devel json-devel libavcodec-free-devel libavdevice-free-devel librist-devel libcurl-devel libdatachannel-devel libdrm-devel libglvnd-devel libqrcodegencpp-devel libuuid-devel libva-devel libv4l-devel libvpl-devel libX11-devel libXcomposite-devel libXdamage libXinerama-devel libxkbcommon-devel luajit-devel make mbedtls-devel ninja nv-codec-headers pciutils-devel pipewire-devel pulseaudio-libs-devel python3-devel qt6-qtbase-devel qt6-qtbase-private-devel qt6-qtsvg-devel qt6-qtwayland-devel rnnoise-devel speexdsp-devel srt-devel swig systemd-devel uthash-devel vlc-devel wayland-devel websocketpp-devel x264-devel -y"
+          run: "curl -sLo o.tar.xz https://cdn-fastly.obsproject.com/downloads/cef_binary_6533_linux_x86_64.tar.xz"
+          run: "tar -xvf o.tar.xz"
+          run: "mv cef_binary_6533_linux_x86_64 obs-browser"
+          run: "rm o.tar.xz"
 
       - name: Configure 🔧
-        run: "cmake --preset fedora --fresh"
-        run: "cd build_fedora"
+        run: |
+          run: "cmake --preset fedora --fresh"
+          run: "cd build_fedora"
 
       - name: Build 🔨
-        run: "cd $HOME/obs-studio/build_fedora"
-        run: "ninja"
+        run: |
+          run: "cd $HOME/obs-studio/build_fedora"
+          run: "ninja"
