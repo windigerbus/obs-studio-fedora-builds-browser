@@ -43,5 +43,5 @@ jobs:
           mv ./linux-pipewire-audio ${{ github.workspace }}/out/plugins/linux-pipewire-audio
           tree ${{ github.workspace }}/out
           tar -czvf ${{ github.workspace }}/out.tar.gz ${{ github.workspace }}/out
-          echo + gh release create "${{ github.ref_name }}" --repo="$GITHUB_REPOSITORY" --generate-notes
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} gh release create "${{ github.ref_name }}" --repo="$GITHUB_REPOSITORY" --generate-notes
+          echo "+ gh release create "${{ github.ref_name }}" --repo="$GITHUB_REPOSITORY" --generate-notes"
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} gh release create "${{ github.GITHUB_RUN_ID }}" ${{ github.workspace }}/out.tar.gz --repo="$GITHUB_REPOSITORY" --generate-notes
