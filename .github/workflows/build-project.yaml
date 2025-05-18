@@ -44,5 +44,5 @@ jobs:
           tree ${{ github.workspace }}/out
           cd ${{ github.workspace }}
           tar -czvf out.tar.gz out
-          echo "+ gh release create "v0.0.0-$GITHUB_RUN_ID" "${{ github.workspace }}/out.tar.gz" --repo="$GITHUB_REPOSITORY" --generate-notes"
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} gh release create "$GITHUB_RUN_ID" "${{ github.workspace }}/out.tar.gz" --repo="$GITHUB_REPOSITORY" --generate-notes
+          echo "+ gh release create "0.0.0-rc$GITHUB_RUN_ID" "${{ github.workspace }}/out.tar.gz" --repo="$GITHUB_REPOSITORY" --generate-notes"
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} gh release create "0.0.0-rc$GITHUB_RUN_ID" "${{ github.workspace }}/out.tar.gz" --repo="$GITHUB_REPOSITORY" --generate-notes
