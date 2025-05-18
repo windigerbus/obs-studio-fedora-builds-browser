@@ -42,6 +42,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/out/plugins/linux-pipewire-audio
           mv ./linux-pipewire-audio ${{ github.workspace }}/out/plugins/linux-pipewire-audio
           tree ${{ github.workspace }}/out
-          tar -czvf ${{ github.workspace }}/out.tar.gz ${{ github.workspace }}/out
+          cd ${{ github.workspace }}
+          tar -czvf out.tar.gz out
           echo "+ gh release create "$GITHUB_RUN_ID" "${{ github.workspace }}/out.tar.gz" --repo="$GITHUB_REPOSITORY" --generate-notes"
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} gh release create "$GITHUB_RUN_ID" "${{ github.workspace }}/out.tar.gz" --repo="$GITHUB_REPOSITORY" --generate-notes
