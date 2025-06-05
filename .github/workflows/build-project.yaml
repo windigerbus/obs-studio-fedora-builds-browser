@@ -1,6 +1,5 @@
 name: Build Project
-on:
-  workflow_call:
+on: [push]
 jobs:
   check-event:
     name: Event Data 🔎
@@ -367,3 +366,48 @@ jobs:
         with:
           name: obs-studio-windows-${{ matrix.architecture }}-${{ needs.check-event.outputs.commitHash }}
           path: ${{ github.workspace }}/build_${{ matrix.architecture }}/obs-studio-*-windows-${{ matrix.architecture }}.zip
+  fedora-build:
+    name: Fedora
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    container:
+      image: ghcr.io/gbraad-actions/fedora:stable
+      options: --privileged
+    steps:
+      - name: :3
+        run: |
+          rm -rf ${{ github.workspace }}
+          mkdir -p ${{ github.workspace }}
+          cd ${{ github.workspace }}/..
+          git clone --recursive https://github.com/Bummbumm6/obs-studio-fedora-builds-browser
+          sudo dnf install -y dnf-plugins-core
+          sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm -y
+          sudo dnf update -y
+          sudo dnf install --skip-broken gh tree git ninja make curl alsa-lib-devel asio-devel cmake extra-cmake-modules ffmpeg-free-devel fontconfig-devel freetype-devel gcc gcc-c++ gcc-objc git glib2-devel jansson-devel json-devel libavcodec-free-devel libavdevice-free-devel librist-devel libcurl-devel libdatachannel-devel libdrm-devel libglvnd-devel libqrcodegencpp-devel libuuid-devel libva-devel libv4l-devel libvpl-devel libX11-devel libXcomposite-devel libXdamage libXinerama-devel libxkbcommon-devel luajit-devel make mbedtls-devel ninja nv-codec-headers pciutils-devel pipewire-devel pulseaudio-libs-devel python3-devel qt6-qtbase-devel qt6-qtbase-private-devel qt6-qtsvg-devel qt6-qtwayland-devel rnnoise-devel speexdsp-devel srt-devel swig systemd-devel uthash-devel vlc-devel wayland-devel websocketpp-devel x264-devel -y
+          curl -Lo o.tar.xz https://cdn-fastly.obsproject.com/downloads/cef_binary_6533_linux_x86_64.tar.xz
+          tar -xvf o.tar.xz
+          mv cef_binary_6533_linux_x86_64 ${{ github.workspace }}/obs-browser
+          rm o.tar.xz
+          cd ${{ github.workspace }}
+          git config --global --add safe.directory ${{ github.workspace }}
+          GHWORK=${{ github.workspace }} cmake --preset fedora --fresh
+          cd build_fedora
+          ninja
+          cmake --install .
+          cd ${{ github.workspace }}
+          git clone https://github.com/dimtpap/obs-pipewire-audio-capture --recursive
+          cd ${{ github.workspace }}/obs-pipewire-audio-capture
+          cmake -B ./build -S . -DCMAKE_INSTALL_PREFIX="/usr" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX={"type":"STRING","value":"${{ github.workspace }}/out/plugins"} -Dlibobs_DIR="${{ github.workspace }}/build_fedora/libobs"
+          cmake --build ./build
+          mkdir -p ./linux-pipewire-audio/bin/64bit
+          cp ./build/linux-pipewire-audio.so ./linux-pipewire-audio/bin/64bit/linux-pipewire-audio.so
+          cp -r ./data/ ./linux-pipewire-audio/data/
+          mkdir -p ${{ github.workspace }}/out/plugins/linux-pipewire-audio
+          mv ./linux-pipewire-audio ${{ github.workspace }}/out/plugins/linux-pipewire-audio
+          tree ${{ github.workspace }}/out
+          cd ${{ github.workspace }}
+          tar -czvf out.tar.gz out
+          echo "+ gh release create "0.0.0-rc$GITHUB_RUN_ID" "${{ github.workspace }}/out.tar.gz" --repo="$GITHUB_REPOSITORY" --generate-notes"
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} gh release create "0.0.0-rc$GITHUB_RUN_ID" "${{ github.workspace }}/out.tar.gz" --repo="$GITHUB_REPOSITORY" --generate-notes
