@@ -1,3 +1,6 @@
+This fork is running GitHub Actions and automatically publishes portable
+binary builds for Fedora with CEF Browser support as GH Releases.
+
 OBS Studio <https://obsproject.com>
 ===================================
 
