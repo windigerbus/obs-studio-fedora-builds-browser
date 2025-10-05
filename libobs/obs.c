@@ -899,6 +899,7 @@ static bool obs_init_audio(struct audio_output_info *ai)
 
 	audio->monitoring_device_name = bstrdup("Default");
 	audio->monitoring_device_id = bstrdup("default");
+	audio->monitoring_duplication_prevented_on_prev_tick = false;
 
 	errorcode = audio_output_open(&audio->audio, ai);
 	if (errorcode == AUDIO_OUTPUT_SUCCESS)
@@ -1401,6 +1402,14 @@ void obs_shutdown(void)
 	}
 	obs->first_module = NULL;
 
+	module = obs->first_disabled_module;
+	while (module) {
+		struct obs_module *next = module->next;
+		free_module(module);
+		module = next;
+	}
+	obs->first_disabled_module = NULL;
+
 	obs_free_data();
 	obs_free_audio();
 	obs_free_video();
@@ -1412,13 +1421,25 @@ void obs_shutdown(void)
 	obs->procs = NULL;
 	obs->signals = NULL;
 
-	for (size_t i = 0; i < obs->module_paths.num; i++)
+	for (size_t i = 0; i < obs->module_paths.num; i++) {
 		free_module_path(obs->module_paths.array + i);
+	}
 	da_free(obs->module_paths);
 
-	for (size_t i = 0; i < obs->safe_modules.num; i++)
+	for (size_t i = 0; i < obs->safe_modules.num; i++) {
 		bfree(obs->safe_modules.array[i]);
+	}
 	da_free(obs->safe_modules);
+
+	for (size_t i = 0; i < obs->disabled_modules.num; i++) {
+		bfree(obs->disabled_modules.array[i]);
+	}
+	da_free(obs->disabled_modules);
+
+	for (size_t i = 0; i < obs->core_modules.num; i++) {
+		bfree(obs->core_modules.array[i]);
+	}
+	da_free(obs->core_modules);
 
 	if (obs->name_store_owned)
 		profiler_name_store_free(obs->name_store);
@@ -1832,7 +1853,7 @@ void obs_canvas_enum_scenes(obs_canvas_t *canvas, bool (*enum_proc)(void *, obs_
 	while (source) {
 		obs_source_t *s = obs_source_get_ref(source);
 		if (s) {
-			if (obs_source_is_scene(source) && !enum_proc(param, s)) {
+			if (source->info.type == OBS_SOURCE_TYPE_SCENE && !enum_proc(param, s)) {
 				obs_source_release(s);
 				break;
 			}
@@ -2238,7 +2259,7 @@ static obs_source_t *obs_load_source_type(obs_data_t *source_data, bool is_priva
 	if (!*v_id)
 		v_id = id;
 
-	if (strcmp(id, scene_info.id) == 0 || strcmp(id, group_info.id) == 0) {
+	if (obs_source_type_is_scene(id) || obs_source_type_is_group(id)) {
 		const char *canvas_uuid = obs_data_get_string(source_data, "canvas_uuid");
 		canvas = obs_get_canvas_by_uuid(canvas_uuid);
 		/* Fall back to main canvas if canvas cannot be found. */

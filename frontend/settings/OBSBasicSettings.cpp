@@ -609,10 +609,23 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 		ui->processPriority->addItem(QTStr(pri.name), pri.val);
 
 #else
+#if defined(__APPLE__) && defined(__aarch64__)
+	delete ui->adapterLabel;
+	delete ui->adapter;
+
+	ui->adapterLabel = nullptr;
+	ui->adapter = nullptr;
+#else
 	delete ui->rendererLabel;
 	delete ui->renderer;
 	delete ui->adapterLabel;
 	delete ui->adapter;
+
+	ui->rendererLabel = nullptr;
+	ui->renderer = nullptr;
+	ui->adapterLabel = nullptr;
+	ui->adapter = nullptr;
+#endif
 	delete ui->processPriorityLabel;
 	delete ui->processPriority;
 	delete ui->enableNewSocketLoop;
@@ -624,10 +637,6 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 #endif
 	delete ui->disableAudioDucking;
 
-	ui->rendererLabel = nullptr;
-	ui->renderer = nullptr;
-	ui->adapterLabel = nullptr;
-	ui->adapter = nullptr;
 	ui->processPriorityLabel = nullptr;
 	ui->processPriority = nullptr;
 	ui->enableNewSocketLoop = nullptr;
@@ -1055,6 +1064,7 @@ void OBSBasicSettings::LoadFormats()
 	ui->simpleOutRecFormat->addItem(FORMAT_STR("MP4"), "mp4");
 	ui->simpleOutRecFormat->addItem(FORMAT_STR("MOV"), "mov");
 	ui->simpleOutRecFormat->addItem(FORMAT_STR("hMP4"), "hybrid_mp4");
+	ui->simpleOutRecFormat->addItem(FORMAT_STR("hMOV"), "hybrid_mov");
 	ui->simpleOutRecFormat->addItem(FORMAT_STR("fMP4"), "fragmented_mp4");
 	ui->simpleOutRecFormat->addItem(FORMAT_STR("fMOV"), "fragmented_mov");
 	ui->simpleOutRecFormat->addItem(FORMAT_STR("TS"), "mpegts");
@@ -1064,6 +1074,7 @@ void OBSBasicSettings::LoadFormats()
 	ui->advOutRecFormat->addItem(FORMAT_STR("MP4"), "mp4");
 	ui->advOutRecFormat->addItem(FORMAT_STR("MOV"), "mov");
 	ui->advOutRecFormat->addItem(FORMAT_STR("hMP4"), "hybrid_mp4");
+	ui->advOutRecFormat->addItem(FORMAT_STR("hMOV"), "hybrid_mov");
 	ui->advOutRecFormat->addItem(FORMAT_STR("fMP4"), "fragmented_mp4");
 	ui->advOutRecFormat->addItem(FORMAT_STR("fMOV"), "fragmented_mov");
 	ui->advOutRecFormat->addItem(FORMAT_STR("TS"), "mpegts");
@@ -1382,16 +1393,21 @@ void OBSBasicSettings::LoadGeneralSettings()
 
 void OBSBasicSettings::LoadRendererList()
 {
-#ifdef _WIN32
+#if defined(_WIN32) || (defined(__APPLE__) && defined(__aarch64__))
 	const char *renderer = config_get_string(App()->GetAppConfig(), "Video", "Renderer");
-
-	ui->renderer->addItem(QT_UTF8("Direct3D 11"));
-	if (opt_allow_opengl || strcmp(renderer, "OpenGL") == 0)
-		ui->renderer->addItem(QT_UTF8("OpenGL"));
-
-	int idx = ui->renderer->findText(QT_UTF8(renderer));
-	if (idx == -1)
-		idx = 0;
+#ifdef _WIN32
+	ui->renderer->addItem(QString("Direct3D 11"), QString("Direct3D 11"));
+	if (opt_allow_opengl || strcmp(renderer, "OpenGL") == 0) {
+		ui->renderer->addItem(QString("OpenGL"), QString("OpenGL"));
+	}
+#else
+	ui->renderer->addItem(QString("OpenGL"), QString("OpenGL"));
+	ui->renderer->addItem(QTStr("Basic.Settings.Video.Renderer.Experimental").arg("Metal"), QString("Metal"));
+#endif
+	int index = ui->renderer->findData(QString(renderer));
+	if (index == -1) {
+		index = 0;
+	}
 
 	// the video adapter selection is not currently implemented, hide for now
 	// to avoid user confusion. was previously protected by
@@ -1401,7 +1417,7 @@ void OBSBasicSettings::LoadRendererList()
 	ui->adapter = nullptr;
 	ui->adapterLabel = nullptr;
 
-	ui->renderer->setCurrentIndex(idx);
+	ui->renderer->setCurrentIndex(index);
 #endif
 }
 
@@ -3128,10 +3144,14 @@ void OBSBasicSettings::SaveAdvancedSettings()
 {
 	QString lastMonitoringDevice = config_get_string(main->Config(), "Audio", "MonitoringDeviceId");
 
-#ifdef _WIN32
-	if (WidgetChanged(ui->renderer))
-		config_set_string(App()->GetAppConfig(), "Video", "Renderer", QT_TO_UTF8(ui->renderer->currentText()));
+#if defined(_WIN32) || (defined(__APPLE__) && defined(__aarch64__))
+	if (WidgetChanged(ui->renderer)) {
+		config_set_string(App()->GetAppConfig(), "Video", "Renderer",
+				  QT_TO_UTF8(ui->renderer->currentData().toString()));
+	}
+#endif
 
+#ifdef _WIN32
 	std::string priority = QT_TO_UTF8(ui->processPriority->currentData().toString());
 	config_set_string(App()->GetAppConfig(), "General", "ProcessPriority", priority.c_str());
 	if (main->Active())
@@ -5571,8 +5591,6 @@ void OBSBasicSettings::UpdateAdvNetworkGroup()
 #endif
 }
 
-extern bool MultitrackVideoDeveloperModeEnabled();
-
 void OBSBasicSettings::UpdateMultitrackVideo()
 {
 	// Technically, it should currently be safe to toggle multitrackVideo
@@ -5595,15 +5613,6 @@ void OBSBasicSettings::UpdateMultitrackVideo()
 			ui->enableMultitrackVideo->setChecked(false);
 	}
 
-	// Enhanced Broadcasting works on Windows, Apple Silicon Macs, and Linux.
-	// For other OS variants, only enable the GUI controls if developer mode was invoked.
-#if !defined(_WIN32) && !(defined(__APPLE__) && defined(__aarch64__)) && !defined(__linux__)
-	available = available && MultitrackVideoDeveloperModeEnabled();
-#endif
-
-	if (IsCustomService())
-		available = available && MultitrackVideoDeveloperModeEnabled();
-
 	ui->multitrackVideoGroupBox->setVisible(available);
 
 	ui->enableMultitrackVideo->setEnabled(toggle_available);
@@ -5624,10 +5633,10 @@ void OBSBasicSettings::UpdateMultitrackVideo()
 							  !ui->multitrackVideoMaximumVideoTracksAuto->isChecked());
 	ui->multitrackVideoAdditionalCanvas->setEnabled(toggle_available && ui->enableMultitrackVideo->isChecked());
 
-	ui->multitrackVideoStreamDumpEnable->setVisible(available && MultitrackVideoDeveloperModeEnabled());
-	ui->multitrackVideoConfigOverrideEnable->setVisible(available && MultitrackVideoDeveloperModeEnabled());
-	ui->multitrackVideoConfigOverrideLabel->setVisible(available && MultitrackVideoDeveloperModeEnabled());
-	ui->multitrackVideoConfigOverride->setVisible(available && MultitrackVideoDeveloperModeEnabled());
+	ui->multitrackVideoStreamDumpEnable->setVisible(available && IsCustomService());
+	ui->multitrackVideoConfigOverrideEnable->setVisible(available && IsCustomService());
+	ui->multitrackVideoConfigOverrideLabel->setVisible(available && IsCustomService());
+	ui->multitrackVideoConfigOverride->setVisible(available && IsCustomService());
 
 	ui->multitrackVideoStreamDumpEnable->setEnabled(toggle_available && ui->enableMultitrackVideo->isChecked());
 	ui->multitrackVideoConfigOverrideEnable->setEnabled(toggle_available && ui->enableMultitrackVideo->isChecked());
