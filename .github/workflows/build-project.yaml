@@ -404,7 +404,7 @@ jobs:
           cd ${{ github.workspace }}
           git clone https://github.com/dimtpap/obs-pipewire-audio-capture --recursive
           cd ${{ github.workspace }}/obs-pipewire-audio-capture
-          cmake -B ./build -S . -DCMAKE_INSTALL_PREFIX="/usr" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX={"type":"STRING","value":"${{ github.workspace }}/out/plugins"} -Dlibobs_DIR="${{ github.workspace }}/build_fedora/libobs"
+          cmake -B ./build -S . -DCMAKE_INSTALL_PREFIX={"type":"STRING","value":"${{ github.workspace }}/out/plugins"} -Dlibobs_DIR="${{ github.workspace }}/obs-studio-fedora-builds-browser/build_fedora/libobs"
           cmake --build ./build
           mkdir -p ./linux-pipewire-audio/bin/64bit
           cp ./build/linux-pipewire-audio.so ./linux-pipewire-audio/bin/64bit/linux-pipewire-audio.so
@@ -414,5 +414,4 @@ jobs:
           tree ${{ github.workspace }}/out
           cd ${{ github.workspace }}
           tar -czvf out.tar.gz out
-          echo "+ gh release create "0.0.0-rc$GITHUB_RUN_ID" "${{ github.workspace }}/out.tar.gz" --repo="$GITHUB_REPOSITORY" --generate-notes"
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} gh release create "0.0.0-rc$GITHUB_RUN_ID" "${{ github.workspace }}/out.tar.gz" --repo="$GITHUB_REPOSITORY" --generate-notes
