@@ -404,7 +404,7 @@ jobs:
           cd ${{ github.workspace }}
           git clone https://github.com/dimtpap/obs-pipewire-audio-capture --recursive
           cd ${{ github.workspace }}/obs-pipewire-audio-capture
-          cmake -B ./build -S . -DCMAKE_INSTALL_PREFIX={"type":"STRING","value":"${{ github.workspace }}/out/plugins"} -Dlibobs_DIR="${{ github.workspace }}/obs-studio-fedora-builds-browser/build_fedora/libobs"
+          cmake -B ./build -S . -DCMAKE_INSTALL_PREFIX={"type":"STRING","value":"${{ github.workspace }}/build_fedora/libobs"} -Dlibobs_DIR="${{ github.workspace }}/build_fedora/libobs"
           cmake --build ./build
           mkdir -p ./linux-pipewire-audio/bin/64bit
           cp ./build/linux-pipewire-audio.so ./linux-pipewire-audio/bin/64bit/linux-pipewire-audio.so
