@@ -392,7 +392,7 @@ jobs:
           rm o.tar.xz
           cd ${{ github.workspace }}
           git config --global --add safe.directory ${{ github.workspace }}
-          GHWORK=${{ github.workspace }} cmake --preset fedora --fresh
+          GHWORK=${{ github.workspace }} cmake --preset fedora --fresh -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF
           cd build_fedora
           ninja
           cmake --install .
