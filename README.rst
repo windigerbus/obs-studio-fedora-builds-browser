@@ -1,1 +1,3 @@
-# Use https://packages.fedoraproject.org/pkgs/obs-studio/obs-studio-plugin-browser
+================================================================================
+Use https://packages.fedoraproject.org/pkgs/obs-studio/obs-studio-plugin-browser
+================================================================================
